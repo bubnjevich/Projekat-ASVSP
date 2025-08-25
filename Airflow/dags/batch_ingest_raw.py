@@ -9,7 +9,7 @@ from airflow.decorators import dag
 @dag(
     dag_id="batch_ingest_raw",
     description="Ingest CSV in RAW zone on HDFS",
-    start_date=datetime(2024, 11, 5),
+    start_date=datetime(2025, 8, 25),
     schedule_interval=None,
     max_active_runs=1,
     catchup=False,
