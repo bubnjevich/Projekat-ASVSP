@@ -1,0 +1,39 @@
+# IDE fajlovi
+.idea/
+.vscode/
+
+# Python cache fajlovi
+__pycache__/
+*.pyc
+*.pyo
+
+# Airflow
+Airflow/logs/
+Airflow/files/
+Airflow/.env
+
+# Spark (ako pravi output/logove)
+Apache-Spark/logs/
+Apache-Spark/.idea/
+Hive/.env
+Hadoop/.env
+Apache-Spark/.env
+
+# Kafka consumer i drugi projekti (isto da ne ide .idea i logovi)
+Simple-Kafka-Consumer/.idea/
+Kafka/logs/
+
+# Generalno ignorisanje logova i tmp fajlova
+*.log
+*.tmp
+*.swp
+
+# Veće fajlove koje ne želiš u repozitorijumu
+*.gz
+*.zip
+*.tar
+*.tar.gz
+
+# OS fajlovi
+.DS_Store
+Thumbs.db
