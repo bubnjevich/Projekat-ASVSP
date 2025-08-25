@@ -15,6 +15,7 @@ services:
       - 9000:9000
     volumes:
       - ./data:/data
+      - ../Airflow/files:/opt/airflow/files
       - hadoop_namenode:/hadoop/dfs/name
     environment:
       - CLUSTER_NAME=test
