@@ -52,78 +52,48 @@ def main(run_date, raw_path, out_base):
           .withColumn("event_id", F.col("eventid"))
           )
 
-    # 4) Validacija & quarantine
-    cond_valid = (
-        F.col("start_time_utc").isNotNull() &
-        F.col("end_time_utc").isNotNull() &
-        (F.col("end_time_utc") >= F.col("start_time_utc")) &
-        F.col("type").isNotNull() &
-        (F.col("location_lat").between(-90, 90)) &
-        (F.col("location_lng").between(-180, 180))
-    )
-    df_bad = (df.where(~cond_valid)
-                .withColumn("reject_reason", F.lit("basic_validation_failed")))
-
-    # 5) Derivacije
-    df_good = (df.where(cond_valid)
-                 .withColumn("duration_min", (F.col("end_time_utc").cast("long") - F.col("start_time_utc").cast("long"))/60.0)
-                 .where(F.col("duration_min") > 0)
-                 .withColumn("event_date", F.to_date("start_time_utc"))
-                 .withColumn("event_year", F.year("start_time_utc"))
-                 .withColumn("event_month", F.month("start_time_utc"))
-                 .withColumn("event_day", F.dayofmonth("start_time_utc"))
-                 .withColumn("hour_of_day", F.hour("start_time_utc"))
-                 .withColumn("dow", ((F.dayofweek("start_time_utc") + 5) % 7) + 1)
-                 .withColumn("season", season_expr(F.col("event_month")))
-                 .withColumn("is_night", (F.col("hour_of_day") < 6) | (F.col("hour_of_day") >= 20))
-                 .withColumn("local_start_ts", F.when(F.col("timezone").isNotNull(),
-                       F.from_utc_timestamp(F.col("start_time_utc"), F.col("timezone"))).otherwise(F.col("start_time_utc")))
-                 .withColumn("local_end_ts", F.when(F.col("timezone").isNotNull(),
-                       F.from_utc_timestamp(F.col("end_time_utc"), F.col("timezone"))).otherwise(F.col("end_time_utc")))
+    # 4) Derivacije
+    df_good = (df
+               .withColumn("duration_min",
+                           (F.col("end_time_utc").cast("long") - F.col("start_time_utc").cast("long")) / 60.0)
+               .withColumn("event_date", F.to_date("start_time_utc"))
+               .withColumn("event_year", F.year("start_time_utc"))
+               .withColumn("event_month", F.month("start_time_utc"))
+               .withColumn("event_day", F.dayofmonth("start_time_utc"))
+               .withColumn("hour_of_day", F.hour("start_time_utc"))
+               .withColumn("dow", ((F.dayofweek("start_time_utc") + 5) % 7) + 1)
+               .withColumn("season", season_expr(F.col("event_month")))
+               .withColumn("is_night", (F.col("hour_of_day") < 6) | (F.col("hour_of_day") >= 20))
+               .withColumn("local_start_ts", F.when(F.col("timezone").isNotNull(),
+                                                    F.from_utc_timestamp(F.col("start_time_utc"),
+                                                                         F.col("timezone"))).otherwise(
+        F.col("start_time_utc")))
+               .withColumn("local_end_ts", F.when(F.col("timezone").isNotNull(),
+                                                  F.from_utc_timestamp(F.col("end_time_utc"),
+                                                                       F.col("timezone"))).otherwise(
+        F.col("end_time_utc")))
                )
 
-
-    # 6) Deduplikacija
+    # 5) Deduplikacija
+    from pyspark.sql.window import Window
     if "event_id" in df_good.columns:
-        from pyspark.sql.window import Window
         w = Window.partitionBy("event_id").orderBy(F.col("start_time_utc").asc())
         df_good = (df_good
                    .withColumn("rn", F.row_number().over(w))
                    .where(F.col("rn") == 1)
                    .drop("rn"))
 
-    # 7) Upis – events_clean (Parquet, particionisano)
+    # 6) Upis
     out_clean = f"{out_base}/events_clean"
     (df_good
-        .repartition("event_year","event_month")
-        .write.mode("append")
-        .partitionBy("event_year","event_month")
-        .option("compression","snappy")
-        .parquet(out_clean))
-
-    # 8) Quarantine + DQ metrika
-    out_quar = f"{out_base}/quarantine"
-    (df_bad
-        .withColumn("dt", F.lit(run_date))
-        .write.mode("append")
-        .partitionBy("dt")
-        .option("compression","snappy")
-        .parquet(out_quar))
-
-    metrics = {
-        "run_dt": run_date,
-        "raw_count": df_raw.count(),
-        "clean_count": df_good.count(),
-        "quarantine_count": df_bad.count(),
-        "min_start": df_good.agg(F.min("start_time_utc")).first()[0] if df_good.head(1) else None,
-        "max_end": df_good.agg(F.max("end_time_utc")).first()[0] if df_good.head(1) else None,
-        "distinct_airports": df_good.select("airport_code").distinct().count() if "airport_code" in df_good.columns else None,
-    }
-    (spark.createDataFrame([metrics])
-          .write.mode("append")
-          .json(f"{out_base}/dq_metrics/run_dt={run_date}"))
+     .repartition("event_year", "event_month")
+     .write.mode("overwrite")
+     .partitionBy("event_year", "event_month")
+     .option("compression", "snappy")
+     .parquet(out_clean))
 
     spark.stop()
+
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
