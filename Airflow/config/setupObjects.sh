@@ -34,6 +34,11 @@ airflow connections add 'LOCAL_FS_FILES' \
         "extra": "{ \"path\": \"/opt/airflow/files\"}"
     }'
 
+# Citus
+airflow connections add CITUS_DEFAULT \
+  --conn-uri postgresql://admin:admin@citus:5432/weather_bi
+
+
 # Set up variables
 # echo ">> Setting up airflow variables"
 # airflow variables set SQL_CHUNK_SIZE 20

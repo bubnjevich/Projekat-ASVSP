@@ -14,6 +14,15 @@ from airflow.providers.ssh.hooks.ssh import SSHHook
     catchup=False,
 )
 def batch_transform():
+    spark_transform = SparkSubmitOperator(
+    task_id="spark_transform",
+    application="/opt/airflow/dags/jobs/transform_weather.py",
+    conn_id="SPARK_CONNECTION",
+    application_args=[
+        "--run-date", "{{ ds }}",
+        "--raw-path", "hdfs://namenode:9000/data/weather/raw/2025-08-25/WeatherEvents.csv",
+        "--out-base", "hdfs://namenode:9000/data/weather/transform",
+    ])
 
     @task(task_id="hive_create_events_clean")
     def hive_create_events_clean():
@@ -55,6 +64,6 @@ def batch_transform():
         hook = HiveServer2Hook(hiveserver2_conn_id="HIVE_CONNECTION")
         hook.run("MSCK REPAIR TABLE events_clean")
 
-    hive_create_events_clean() >> hive_msck_repair()
+    spark_transform >> hive_create_events_clean() >> hive_msck_repair()
 
 batch_transform()

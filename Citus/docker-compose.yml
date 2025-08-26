@@ -31,6 +31,9 @@ services:
       - citus
     networks:
       - asvsp
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin 
 
 volumes:
   citus_data:
+  pgadmin-data:
