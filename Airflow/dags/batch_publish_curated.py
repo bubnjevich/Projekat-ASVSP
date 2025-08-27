@@ -85,9 +85,33 @@ def batch_publish_curated():
         jars=POSTGRES_JDBC_JAR,
         verbose=False
     )
+
+    citus_prepare_3h_peak  = PostgresOperator(
+        task_id="citus_prepare_3h_peak_hours_daily",
+        postgres_conn_id=CITUS_CONN_ID,
+        sql = peak3h_sql
+    )
+
+    peak_3h_hours_daily = SparkSubmitOperator(
+        task_id="publish_3h_peak_hours_daily",
+        application="/opt/airflow/dags/jobs/publish_peak_three_h_daily.py",
+        name="publish_3h_peak_hours_daily",
+        conn_id=SPARK_CONN_ID,
+        application_args=[
+            "--jdbc-url", "jdbc:postgresql://citus:5432/weather_bi",
+            "--dbtable", "curated.peak_exposure_3h_daily",
+            "--dbuser", "admin",
+            "--dbpassword", "admin",
+            "--jdbc-mode", "overwrite"
+        ],
+        jars=POSTGRES_JDBC_JAR,
+        verbose=False
+    )
+
+
     #citus_prepare_exposure >> publish_exposure_hours
     #citus_prepare_longest >> publish_longest_episodes
-    citus_prepare_cooccurrence >> publish_cooccurrence
-
+    #citus_prepare_cooccurrence >> publish_cooccurrence
+    citus_prepare_3h_peak >> peak_3h_hours_daily
 
 dag = batch_publish_curated()
