@@ -3,6 +3,7 @@ from datetime import datetime
 from airflow.decorators import dag
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 from airflow.providers.postgres.operators.postgres import PostgresOperator
+from ddl_commands import *
 
 CITUS_CONN_ID = "CITUS_DEFAULT"
 POSTGRES_JDBC_JAR = "/shared/postgresql-42.7.3.jar"
@@ -18,29 +19,6 @@ SPARK_CONN_ID = "SPARK_CONNECTION"
     tags=["publish", "citus"],
 )
 def batch_publish_curated():
-    exposure_sql = """
-    CREATE SCHEMA IF NOT EXISTS curated;
-    CREATE EXTENSION IF NOT EXISTS citus;
-
-    CREATE TABLE IF NOT EXISTS curated.exposure_hours_daily (
-        airport_code text NOT NULL,
-        event_date date NOT NULL,
-        exposure_hours_day double precision NOT NULL,
-        exposure_hours_30d double precision,
-        exposure_hours_90d double precision,
-        PRIMARY KEY (airport_code, event_date)
-    );
-
-    DO $$
-    BEGIN
-        IF NOT EXISTS (
-            SELECT 1 FROM pg_dist_partition
-            WHERE logicalrelid = 'curated.exposure_hours_daily'::regclass
-        ) THEN
-            PERFORM create_distributed_table('curated.exposure_hours_daily', 'airport_code');
-        END IF;
-    END $$;
-    """
 
     citus_prepare_exposure = PostgresOperator(
         task_id="citus_prepare_exposure_hours",
@@ -64,7 +42,30 @@ def batch_publish_curated():
         verbose=False
     )
 
-    citus_prepare_exposure >> publish_exposure_hours
+    citus_prepare_longest = PostgresOperator(
+        task_id="citus_prepare_longest_episodes",
+        postgres_conn_id=CITUS_CONN_ID,
+        sql=longest_sql,
+    )
+
+    publish_longest_episodes = SparkSubmitOperator(
+        task_id="publish_longest_episodes",
+        application="/opt/airflow/dags/jobs/publish_longest_episodes.py",
+        name="publish_longest_episodes",
+        conn_id=SPARK_CONN_ID,
+        application_args=[
+            "--jdbc-url", "jdbc:postgresql://citus:5432/weather_bi",
+            "--dbtable", "curated.longest_episodes",
+            "--dbuser", "admin",
+            "--dbpassword", "admin",
+            "--jdbc-mode", "overwrite"
+        ],
+        jars=POSTGRES_JDBC_JAR,
+        verbose=False
+    )
+
+    #citus_prepare_exposure >> publish_exposure_hours
+    citus_prepare_longest >> publish_longest_episodes
 
 
 dag = batch_publish_curated()
