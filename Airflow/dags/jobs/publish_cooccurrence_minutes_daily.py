@@ -22,7 +22,7 @@ def build_spark(app_name="publish_cooccurrence_minutes_daily"):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--jdbc-url", required=True)
-    ap.add_argument("--dbtable", required=True)      # npr. curated.cooccurrence_minutes_daily
+    ap.add_argument("--dbtable", required=True)
     ap.add_argument("--dbuser", required=True)
     ap.add_argument("--dbpassword", required=True)
     ap.add_argument("--jdbc-mode", default="overwrite", choices=["overwrite","append"])
