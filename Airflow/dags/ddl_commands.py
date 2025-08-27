@@ -47,4 +47,34 @@ exposure_sql = """
     END $$;
 """
 
+cooccurrence_sql = """
+    CREATE SCHEMA IF NOT EXISTS curated;
+    CREATE EXTENSION IF NOT EXISTS citus;
+
+    -- Daily co-occurrence (minute overlap) per airport and pair of types
+    CREATE TABLE IF NOT EXISTS curated.cooccurrence_minutes_daily (
+        airport_code   text        NOT NULL,
+        event_date     date        NOT NULL,
+        type_i         text        NOT NULL,
+        type_j         text        NOT NULL,
+        overlap_minutes double precision NOT NULL,
+        -- kanonizovan par za jedinstvenost (RAIN+FOG == FOG+RAIN)
+        type_pair text GENERATED ALWAYS AS (
+            CASE WHEN type_i <= type_j THEN type_i || '+' || type_j
+                 ELSE type_j || '+' || type_i
+            END
+        ) STORED,
+        PRIMARY KEY (airport_code, event_date, type_pair)
+    );
+
+    DO $$
+    BEGIN
+        IF NOT EXISTS (
+            SELECT 1 FROM pg_dist_partition
+            WHERE logicalrelid = 'curated.cooccurrence_minutes_daily'::regclass
+        ) THEN
+            PERFORM create_distributed_table('curated.cooccurrence_minutes_daily', 'airport_code');
+        END IF;
+    END $$;
+"""
 

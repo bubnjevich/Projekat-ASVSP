@@ -64,8 +64,30 @@ def batch_publish_curated():
         verbose=False
     )
 
+    citus_prepare_cooccurrence  = PostgresOperator(
+        task_id="citus_prepare_cooccurrence_minutes_daily",
+        postgres_conn_id=CITUS_CONN_ID,
+        sql = cooccurrence_sql
+    )
+
+    publish_cooccurrence = SparkSubmitOperator(
+        task_id="publish_cooccurrence_minutes_daily",
+        application="/opt/airflow/dags/jobs/publish_cooccurrence_minutes_daily.py",
+        name="publish_cooccurrence_minutes_daily",
+        conn_id=SPARK_CONN_ID,
+        application_args=[
+            "--jdbc-url", "jdbc:postgresql://citus:5432/weather_bi",
+            "--dbtable", "curated.cooccurrence_minutes_daily",
+            "--dbuser", "admin",
+            "--dbpassword", "admin",
+            "--jdbc-mode", "overwrite"
+        ],
+        jars=POSTGRES_JDBC_JAR,
+        verbose=False
+    )
     #citus_prepare_exposure >> publish_exposure_hours
-    citus_prepare_longest >> publish_longest_episodes
+    #citus_prepare_longest >> publish_longest_episodes
+    citus_prepare_cooccurrence >> publish_cooccurrence
 
 
 dag = batch_publish_curated()
