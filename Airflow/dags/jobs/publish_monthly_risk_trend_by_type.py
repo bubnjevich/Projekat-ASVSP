@@ -50,14 +50,27 @@ def main():
           )
     )
 
-    # 3) MOM promena po airport+type (lag po hronologiji meseci)
+    # 3) MoM promena po airport+type (samo ako je prethodni mesec zaista uzastopan)
     w = window.partitionBy("airport_code", "type").orderBy("year", "month")
-    monthly = monthly.withColumn("prev_avg", F.lag("avg_duration_min").over(w))
-    monthly = monthly.withColumn(
+
+    monthly = (monthly
+               .withColumn("prev_avg", F.lag("avg_duration_min").over(w))
+               .withColumn("prev_year", F.lag("year").over(w))
+               .withColumn("prev_month", F.lag("month").over(w))
+               .withColumn(
+        "is_consecutive",
+        ((F.col("year") == F.col("prev_year")) & (F.col("month") == F.col("prev_month") + 1)) |
+        ((F.col("year") == F.col("prev_year") + 1) & (F.col("prev_month") == 12) & (F.col("month") == 1))
+    )
+        .withColumn(
         "mom_change_pct",
-        F.when(F.col("prev_avg").isNull() | (F.col("prev_avg") < 5), None)
-         .otherwise(F.round(((F.col("avg_duration_min") - F.col("prev_avg")) / F.col("prev_avg")) * 100.0, 2))
-    ).drop("prev_avg")
+        F.when(
+            F.col("is_consecutive") & F.col("prev_avg").isNotNull() & (F.col("prev_avg") >= 5),
+            F.round(((F.col("avg_duration_min") - F.col("prev_avg")) / F.col("prev_avg")) * 100.0, 2)
+        ).otherwise(F.lit(None).cast("double"))
+    )
+    .drop("prev_avg", "prev_year", "prev_month", "is_consecutive")
+    )
 
     # 4) Upis u Citus
     (monthly.write
