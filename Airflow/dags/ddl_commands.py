@@ -101,3 +101,30 @@ peak3h_sql = """
 END $$;
 """
 
+monthly_trend_by_type_sql = """
+    CREATE SCHEMA IF NOT EXISTS curated;
+    CREATE EXTENSION IF NOT EXISTS citus;
+
+    CREATE TABLE IF NOT EXISTS curated.monthly_risk_trend_by_type (
+        airport_code      text    NOT NULL,
+        year              int     NOT NULL,
+        month             int     NOT NULL,   -- 1..12
+        type              text    NOT NULL,
+        avg_duration_min  double precision NOT NULL,
+        total_events      bigint  NOT NULL,
+        mom_change_pct    double precision,   -- % promene u odnosu na prethodni mesec (isti airport+type)
+        PRIMARY KEY (airport_code, year, month, type)
+    );
+
+    DO $$
+    BEGIN
+        IF NOT EXISTS (
+            SELECT 1 FROM pg_dist_partition
+            WHERE logicalrelid = 'curated.monthly_risk_trend_by_type'::regclass
+        ) THEN
+            PERFORM create_distributed_table('curated.monthly_risk_trend_by_type', 'airport_code');
+        END IF;
+    END $$;
+"""
+
+
