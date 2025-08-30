@@ -155,3 +155,34 @@ BEGIN
 END $$;
 
 """
+
+risky_sequences_sql = """
+
+CREATE SCHEMA IF NOT EXISTS curated;
+
+CREATE TABLE IF NOT EXISTS curated.risky_sequences (
+    state         text    NOT NULL,
+    county        text    NOT NULL,
+    seq_start_ts  timestamp NOT NULL,
+    seq_end_ts    timestamp NOT NULL,
+    duration_h    double precision NOT NULL,
+    sequence      text    NOT NULL,   -- npr. "RAIN→FREEZE→SNOW"
+    PRIMARY KEY (state, county, seq_start_ts)
+);
+
+-- Distribucija po state
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_dist_partition
+        WHERE logicalrelid = 'curated.risky_sequences'::regclass
+    ) THEN
+        PERFORM create_distributed_table('curated.risky_sequences', 'state');
+    END IF;
+END $$;
+
+
+
+
+
+"""
