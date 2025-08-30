@@ -60,7 +60,8 @@ def main():
         .withColumn("seq_start_ts", F.col("local_start_ts"))
         .withColumn("seq_end_ts", F.col("next_end2"))
         .withColumn("duration_h",
-                    F.round((F.unix_timestamp("next_end2") - F.unix_timestamp("local_start_ts"))/3600.0), 2)
+                    F.round((F.unix_timestamp("next_end2") - F.unix_timestamp("local_start_ts"))/3600.0, 2)
+                    )
         .withColumn("sequence", F.lit("RAIN→FREEZE→SNOW"))
         .select("state","county","seq_start_ts","seq_end_ts","duration_h","sequence")
     )
