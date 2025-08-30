@@ -108,20 +108,42 @@ def batch_publish_curated():
     #     verbose=False
     # )
 
-    citus_prepare_monthly_risk_trend_by_type  = PostgresOperator(
-        task_id="citus_prepare_monthly_risk_trend_by_type",
+    # citus_prepare_monthly_risk_trend_by_type  = PostgresOperator(
+    #     task_id="citus_prepare_monthly_risk_trend_by_type",
+    #     postgres_conn_id=CITUS_CONN_ID,
+    #     sql = monthly_trend_by_type_sql
+    # )
+    #
+    # monthly_risk_trend_by_type = SparkSubmitOperator(
+    #     task_id="monthly_risk_trend_by_type",
+    #     application="/opt/airflow/dags/jobs/publish_monthly_risk_trend_by_type.py",
+    #     name="monthly_risk_trend_by_type",
+    #     conn_id=SPARK_CONN_ID,
+    #     application_args=[
+    #         "--jdbc-url", "jdbc:postgresql://citus:5432/weather_bi",
+    #         "--dbtable", "curated.monthly_risk_trend_by_type",
+    #         "--dbuser", "admin",
+    #         "--dbpassword", "admin",
+    #         "--jdbc-mode", "overwrite"
+    #     ],
+    #     jars=POSTGRES_JDBC_JAR,
+    #     verbose=False
+    # )
+
+    citus_prepare_winter_workload_index = PostgresOperator(
+        task_id="citus_prepare_winter_workload_index",
         postgres_conn_id=CITUS_CONN_ID,
-        sql = monthly_trend_by_type_sql
+        sql=winter_workload_index_sql
     )
 
-    monthly_risk_trend_by_type = SparkSubmitOperator(
-        task_id="monthly_risk_trend_by_type",
-        application="/opt/airflow/dags/jobs/publish_monthly_risk_trend_by_type.py",
-        name="monthly_risk_trend_by_type",
+    winter_workload_index = SparkSubmitOperator(
+        task_id="winter_workload_index",
+        application="/opt/airflow/dags/jobs/publish_winter_workload_index.py",
+        name="winter_workload_index",
         conn_id=SPARK_CONN_ID,
         application_args=[
             "--jdbc-url", "jdbc:postgresql://citus:5432/weather_bi",
-            "--dbtable", "curated.monthly_risk_trend_by_type",
+            "--dbtable", "curated.winter_workload_index",
             "--dbuser", "admin",
             "--dbpassword", "admin",
             "--jdbc-mode", "overwrite"
@@ -131,10 +153,14 @@ def batch_publish_curated():
     )
 
 
+
+
     #citus_prepare_exposure >> publish_exposure_hours
     #citus_prepare_longest >> publish_longest_episodes
     #citus_prepare_cooccurrence >> publish_cooccurrence
     # citus_prepare_3h_peak >> peak_3h_hours_daily
-    citus_prepare_monthly_risk_trend_by_type >> monthly_risk_trend_by_type
+    #citus_prepare_monthly_risk_trend_by_type >> monthly_risk_trend_by_type
+    citus_prepare_winter_workload_index >> winter_workload_index
+
 
 dag = batch_publish_curated()

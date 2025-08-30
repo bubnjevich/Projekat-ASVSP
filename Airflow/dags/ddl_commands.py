@@ -128,3 +128,30 @@ monthly_trend_by_type_sql = """
 """
 
 
+winter_workload_index_sql = """
+CREATE SCHEMA IF NOT EXISTS curated;
+
+CREATE TABLE IF NOT EXISTS curated.winter_workload_index (
+    state             text    NOT NULL,
+    county            text    NOT NULL,
+    year              int     NOT NULL,
+    month             int     NOT NULL,
+    workload_index    double precision NOT NULL,
+    mom_change_pct    double precision,
+    rolling_3m_avg    double precision,
+    rank_in_state     int,
+    PRIMARY KEY (state, county, year, month)
+);
+
+-- Distribucija po state (da bi raspored bio na nivou države)
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_dist_partition
+        WHERE logicalrelid = 'curated.winter_workload_index'::regclass
+    ) THEN
+        PERFORM create_distributed_table('curated.winter_workload_index', 'state');
+    END IF;
+END $$;
+
+"""
