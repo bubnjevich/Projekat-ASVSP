@@ -180,9 +180,30 @@ BEGIN
         PERFORM create_distributed_table('curated.risky_sequences', 'state');
     END IF;
 END $$;
+"""
 
+winter_burstiness_sql = """
+CREATE SCHEMA IF NOT EXISTS curated;
 
+CREATE TABLE IF NOT EXISTS curated.winter_burstiness (
+  state                       text NOT NULL,
+  county                      text NOT NULL,
+  season_year                 int  NOT NULL,  -- zimska sezona: DJF (decembar pripada narednoj year)
+  total_episodes              int  NOT NULL,
+  episodes_over_threshold     int  NOT NULL,
+  avg_interepisode_gap_h      double precision,
+  avg_episode_duration_h      double precision,
+  max_episode_duration_h      double precision,
+  PRIMARY KEY (state, county, season_year)
+);
 
-
-
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_dist_partition
+    WHERE logicalrelid = 'curated.winter_burstiness'::regclass
+  ) THEN
+    PERFORM create_distributed_table('curated.winter_burstiness','state');
+  END IF;
+END $$;
 """

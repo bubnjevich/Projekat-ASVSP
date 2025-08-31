@@ -152,23 +152,47 @@ def batch_publish_curated():
     #     verbose=False
     # )
 
-    citus_prepare_risky_sequences = PostgresOperator(
-        task_id="citus_prepare_risky_sequences",
+    # citus_prepare_risky_sequences = PostgresOperator(
+    #     task_id="citus_prepare_risky_sequences",
+    #     postgres_conn_id=CITUS_CONN_ID,
+    #     sql=risky_sequences_sql
+    # )
+    #
+    # publish_risky_sequences = SparkSubmitOperator(
+    #     task_id="publish_risky_sequences",
+    #     application="/opt/airflow/dags/jobs/publish_risky_sequences.py",
+    #     name="publish_risky_sequences",
+    #     conn_id=SPARK_CONN_ID,
+    #     application_args=[
+    #         "--jdbc-url", "jdbc:postgresql://citus:5432/weather_bi",
+    #         "--dbtable", "curated.risky_sequences",
+    #         "--dbuser", "admin",
+    #         "--dbpassword", "admin",
+    #         "--jdbc-mode", "overwrite"
+    #     ],
+    #     jars=POSTGRES_JDBC_JAR,
+    #     verbose=False
+    # )
+
+    citus_prepare_winter_burstiness = PostgresOperator(
+        task_id="citus_prepare_winter_burstiness",
         postgres_conn_id=CITUS_CONN_ID,
-        sql=risky_sequences_sql
+        sql=winter_burstiness_sql
     )
 
-    publish_risky_sequences = SparkSubmitOperator(
-        task_id="publish_risky_sequences",
-        application="/opt/airflow/dags/jobs/publish_risky_sequences.py",
-        name="publish_risky_sequences",
+    publish_winter_burstiness = SparkSubmitOperator(
+        task_id="publish_winter_burstiness",
+        application="/opt/airflow/dags/jobs/publish_winter_burstiness.py",
+        name="publish_winter_burstiness",
         conn_id=SPARK_CONN_ID,
         application_args=[
             "--jdbc-url", "jdbc:postgresql://citus:5432/weather_bi",
-            "--dbtable", "curated.risky_sequences",
+            "--dbtable", "curated.winter_burstiness",
             "--dbuser", "admin",
             "--dbpassword", "admin",
-            "--jdbc-mode", "overwrite"
+            "--jdbc-mode", "overwrite",
+            "--gap-threshold-hours", "6",
+            "--min-episode-hours", "12"
         ],
         jars=POSTGRES_JDBC_JAR,
         verbose=False
@@ -181,7 +205,8 @@ def batch_publish_curated():
     # citus_prepare_3h_peak >> peak_3h_hours_daily
     #citus_prepare_monthly_risk_trend_by_type >> monthly_risk_trend_by_type
     #citus_prepare_winter_workload_index >> winter_workload_index
-    citus_prepare_risky_sequences >> publish_risky_sequences
+    #citus_prepare_risky_sequences >> publish_risky_sequences
+    citus_prepare_winter_burstiness >> publish_winter_burstiness
 
 
 dag = batch_publish_curated()
