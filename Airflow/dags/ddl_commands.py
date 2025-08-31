@@ -236,3 +236,35 @@ BEGIN
 END $$;
 
 """
+
+winter_fenology_sql = """
+
+CREATE SCHEMA IF NOT EXISTS curated;
+
+CREATE TABLE IF NOT EXISTS curated.winter_fenology (
+    state                         text NOT NULL,
+    county                        text NOT NULL,
+    season_year                   int  NOT NULL, -- DJF: decembar ide u narednu godinu
+    first_event_ts                timestamp NOT NULL, -- prvi zimski dogadjaj za taj okrug i tu godinu
+    last_event_ts                 timestamp NOT NULL, -- poslednji zimski dogadjaj za taj okrug i tu godinu
+    season_length_days            double precision NOT NULL,  -- (last-first) u danima
+    start_shift_days              double precision,           -- pomeraj starta vs. prošla sezona
+    end_shift_days                double precision,           -- pomeraj kraja vs. prošla sezona
+    yoy_length_change_days        double precision,           -- promjena dužine sezone vs. prošla
+    rolling_3y_length_avg_days    double precision,           -- 3-sezonski klizeći prosek dužine
+    PRIMARY KEY (state, county, season_year)
+);
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_dist_partition
+    WHERE logicalrelid = 'curated.winter_fenology'::regclass
+  ) THEN
+    PERFORM create_distributed_table('curated.winter_fenology','state');
+  END IF;
+END $$;
+
+
+
+"""

@@ -198,23 +198,46 @@ def batch_publish_curated():
     #     verbose=False
     # )
 
-    citus_prepare_night_thunderstorm_risk = PostgresOperator(
-        task_id="citus_prepare_night_thunderstorm_risk",
+    # citus_prepare_night_thunderstorm_risk = PostgresOperator(
+    #     task_id="citus_prepare_night_thunderstorm_risk",
+    #     postgres_conn_id=CITUS_CONN_ID,
+    #     sql=night_thunderstorm_risk_sql
+    # )
+    #
+    # publish_night_thunderstorm_risk = SparkSubmitOperator(
+    #     task_id="publish_night_thunderstorm_risk",
+    #     application="/opt/airflow/dags/jobs/publish_night_thunderstorm_risk.py",
+    #     name="publish_night_thunderstorm_risk",
+    #     conn_id=SPARK_CONN_ID,
+    #     application_args=[
+    #         "--jdbc-url", "jdbc:postgresql://citus:5432/weather_bi",
+    #         "--dbtable", "curated.night_thunderstorm_risk",
+    #         "--dbuser", "admin",
+    #         "--dbpassword", "admin",
+    #         "--jdbc-mode", "overwrite"
+    #     ],
+    #     jars=POSTGRES_JDBC_JAR,
+    #     verbose=False
+    # )
+
+    citus_prepare_winter_fenology = PostgresOperator(
+        task_id="citus_prepare_winter_fenology",
         postgres_conn_id=CITUS_CONN_ID,
-        sql=night_thunderstorm_risk_sql
+        sql=winter_fenology_sql
     )
 
-    publish_night_thunderstorm_risk = SparkSubmitOperator(
-        task_id="publish_night_thunderstorm_risk",
-        application="/opt/airflow/dags/jobs/publish_night_thunderstorm_risk.py",
-        name="publish_night_thunderstorm_risk",
+    publish_winter_fenology = SparkSubmitOperator(
+        task_id="publish_winter_fenology",
+        application="/opt/airflow/dags/jobs/publish_winter_fenology.py",
+        name="publish_winter_fenology",
         conn_id=SPARK_CONN_ID,
         application_args=[
             "--jdbc-url", "jdbc:postgresql://citus:5432/weather_bi",
-            "--dbtable", "curated.night_thunderstorm_risk",
+            "--dbtable", "curated.winter_fenology",
             "--dbuser", "admin",
             "--dbpassword", "admin",
-            "--jdbc-mode", "overwrite"
+            "--jdbc-mode", "overwrite",
+            "--winter-types", "SNOW,ICE,COLD"
         ],
         jars=POSTGRES_JDBC_JAR,
         verbose=False
@@ -229,7 +252,8 @@ def batch_publish_curated():
     #citus_prepare_winter_workload_index >> winter_workload_index
     #citus_prepare_risky_sequences >> publish_risky_sequences
     #citus_prepare_winter_burstiness >> publish_winter_burstiness
-    citus_prepare_night_thunderstorm_risk >> publish_night_thunderstorm_risk
+    #citus_prepare_night_thunderstorm_risk >> publish_night_thunderstorm_risk
+    citus_prepare_winter_fenology >> publish_winter_fenology
 
 
 dag = batch_publish_curated()
