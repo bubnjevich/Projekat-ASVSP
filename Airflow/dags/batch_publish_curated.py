@@ -174,25 +174,47 @@ def batch_publish_curated():
     #     verbose=False
     # )
 
-    citus_prepare_winter_burstiness = PostgresOperator(
-        task_id="citus_prepare_winter_burstiness",
+    # citus_prepare_winter_burstiness = PostgresOperator(
+    #     task_id="citus_prepare_winter_burstiness",
+    #     postgres_conn_id=CITUS_CONN_ID,
+    #     sql=winter_burstiness_sql
+    # )
+    #
+    # publish_winter_burstiness = SparkSubmitOperator(
+    #     task_id="publish_winter_burstiness",
+    #     application="/opt/airflow/dags/jobs/publish_winter_burstiness.py",
+    #     name="publish_winter_burstiness",
+    #     conn_id=SPARK_CONN_ID,
+    #     application_args=[
+    #         "--jdbc-url", "jdbc:postgresql://citus:5432/weather_bi",
+    #         "--dbtable", "curated.winter_burstiness",
+    #         "--dbuser", "admin",
+    #         "--dbpassword", "admin",
+    #         "--jdbc-mode", "overwrite",
+    #         "--gap-threshold-hours", "6",
+    #         "--min-episode-hours", "12"
+    #     ],
+    #     jars=POSTGRES_JDBC_JAR,
+    #     verbose=False
+    # )
+
+    citus_prepare_night_thunderstorm_risk = PostgresOperator(
+        task_id="citus_prepare_night_thunderstorm_risk",
         postgres_conn_id=CITUS_CONN_ID,
-        sql=winter_burstiness_sql
+        sql=night_thunderstorm_risk_sql
     )
 
-    publish_winter_burstiness = SparkSubmitOperator(
-        task_id="publish_winter_burstiness",
-        application="/opt/airflow/dags/jobs/publish_winter_burstiness.py",
-        name="publish_winter_burstiness",
+    publish_night_thunderstorm_risk = SparkSubmitOperator(
+        task_id="publish_night_thunderstorm_risk",
+        application="/opt/airflow/dags/jobs/publish_night_thunderstorm_risk.py",
+        name="publish_night_thunderstorm_risk",
         conn_id=SPARK_CONN_ID,
         application_args=[
             "--jdbc-url", "jdbc:postgresql://citus:5432/weather_bi",
-            "--dbtable", "curated.winter_burstiness",
+            "--dbtable", "curated.night_thunderstorm_risk",
             "--dbuser", "admin",
             "--dbpassword", "admin",
-            "--jdbc-mode", "overwrite",
-            "--gap-threshold-hours", "6",
-            "--min-episode-hours", "12"
+            "--jdbc-mode", "overwrite"
         ],
         jars=POSTGRES_JDBC_JAR,
         verbose=False
@@ -206,7 +228,8 @@ def batch_publish_curated():
     #citus_prepare_monthly_risk_trend_by_type >> monthly_risk_trend_by_type
     #citus_prepare_winter_workload_index >> winter_workload_index
     #citus_prepare_risky_sequences >> publish_risky_sequences
-    citus_prepare_winter_burstiness >> publish_winter_burstiness
+    #citus_prepare_winter_burstiness >> publish_winter_burstiness
+    citus_prepare_night_thunderstorm_risk >> publish_night_thunderstorm_risk
 
 
 dag = batch_publish_curated()

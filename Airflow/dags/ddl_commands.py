@@ -207,3 +207,32 @@ BEGIN
   END IF;
 END $$;
 """
+
+night_thunderstorm_risk_sql = """
+CREATE SCHEMA IF NOT EXISTS curated;
+
+CREATE TABLE IF NOT EXISTS curated.night_thunderstorm_risk (
+    state               text NOT NULL,
+    county              text NOT NULL,
+    year                int  NOT NULL,
+    month               int  NOT NULL,
+    count_events        int  NOT NULL,         -- svi THUNDERSTORM događaji (dan + noć)
+    count_night_events  int  NOT NULL,         -- samo noćni
+    night_event_ratio   double precision,      -- procenat noćnih u odnosu na sve
+    avg_duration_h      double precision,      -- prosečno trajanje noćnih oluja
+    avg_severity_score  double precision,      -- prosečna ozbiljnost noćnih oluja
+    rolling_3m_avg_duration double precision,  -- rolling 3M prosečno trajanje noćnih oluja
+    PRIMARY KEY (state, county, year, month)
+);
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_dist_partition
+    WHERE logicalrelid = 'curated.night_thunderstorm_risk'::regclass
+  ) THEN
+    PERFORM create_distributed_table('curated.night_thunderstorm_risk','state');
+  END IF;
+END $$;
+
+"""
