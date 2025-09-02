@@ -50,7 +50,12 @@ def main(run_date, raw_path, out_base):
           .withColumn("county", F.col("county"))
           .withColumn("city", F.col("city"))
           .withColumn("event_id", F.col("eventid"))
+          .drop("starttime_utc_", "endtime_utc_", "locationlat", "locationlng",
+                "precipitation_in_", "zipcode", "airportcode", "eventid")
           )
+
+    # radi simulacije pomeri za 3 godine unapred
+
 
     # 4) Derivacije
     df_good = (df

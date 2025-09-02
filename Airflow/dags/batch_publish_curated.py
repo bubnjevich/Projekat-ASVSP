@@ -36,7 +36,7 @@ def batch_publish_curated():
             "--dbtable", "curated.exposure_hours_daily",
             "--dbuser", "admin",
             "--dbpassword", "admin",
-            "--input-path", "hdfs://namenode:9000/data/weather/transform/events_clean",
+            "--input-path", "hdfs://namenode:9000/data/weather/transform/batch/events_clean",
         ],
         jars=POSTGRES_JDBC_JAR,
         verbose=False

@@ -264,7 +264,36 @@ BEGIN
     PERFORM create_distributed_table('curated.winter_fenology','state');
   END IF;
 END $$;
+"""
 
+weather_events_realtime_sql = """
+CREATE SCHEMA IF NOT EXISTS curated;
 
+CREATE TABLE IF NOT EXISTS curated.weather_events_realtime (
+    airport_code TEXT NOT NULL,
+    state TEXT,
+    county TEXT,
+    event_window_start TIMESTAMPTZ,
+    event_window_end TIMESTAMPTZ,
+    event_count INT,
+    avg_precipitation DOUBLE PRECISION,
+    avg_temp_c DOUBLE PRECISION,
+    avg_humidity DOUBLE PRECISION,
+    avg_cloud DOUBLE PRECISION,
+    avg_wind_kph DOUBLE PRECISION,
+    avg_vis_km DOUBLE PRECISION,
+    avg_pressure_mb DOUBLE PRECISION
+    created_at TIMESTAMPTZ DEFAULT now(),
+    PRIMARY KEY (airport_code, event_window_start)
+);
 
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_dist_partition
+    WHERE logicalrelid = 'curated.weather_events_realtime'::regclass
+  ) THEN
+    PERFORM create_distributed_table('curated.weather_events_realtime','airport_code');
+  END IF;
+END $$;
 """

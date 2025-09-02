@@ -16,7 +16,7 @@ from airflow.providers.ssh.hooks.ssh import SSHHook
 def batch_transform():
     spark_transform = SparkSubmitOperator(
     task_id="spark_transform",
-    application="/opt/airflow/dags/jobs/transform_weather.py",
+    application="/opt/airflow/dags/jobs/batch/transform_weather.py",
     conn_id="SPARK_CONNECTION",
     application_args=[
         "--run-date", "{{ ds }}",
