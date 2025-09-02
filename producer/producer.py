@@ -35,7 +35,7 @@ while True:
         print("Kafka not available, retrying...")
         time.sleep(3)
 
-# Loop – šalje podatke na svake 2 minute
+# Loop – šalje podatke na svake 2 sekunde
 while True:
     for _, row in airports_df.iterrows():
         try:
