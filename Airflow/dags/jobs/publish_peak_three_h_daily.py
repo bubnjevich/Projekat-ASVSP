@@ -3,7 +3,7 @@ from pyspark.sql import SparkSession, functions as F
 from pyspark.sql.window import Window as window
 import argparse
 
-INPUT_PATH = "hdfs://namenode:9000/data/weather/transform/events_clean"
+INPUT_PATH = "hdfs://namenode:9000/data/weather/transform/batch/events_clean"
 RISK_TYPES = ["Fog", "Snow", "Thunderstorm"]
 RISK_SEVERITY = ["Moderate", "Heavy"]
 def quiet_logs(spark):

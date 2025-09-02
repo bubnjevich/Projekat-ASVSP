@@ -6,7 +6,7 @@ import argparse
 RISK_TYPES = ["Fog", "Snow", "Thunderstorm"]
 RISK_SEVERITY = ["Moderate", "Heavy"]
 GAP_MINUTES = 60
-INPUT_PATH = "hdfs://namenode:9000/data/weather/transform/events_clean"
+INPUT_PATH = "hdfs://namenode:9000/data/weather/transform/batch/events_clean"
 
 def quiet_logs(spark):
     jvm = spark.sparkContext._jvm

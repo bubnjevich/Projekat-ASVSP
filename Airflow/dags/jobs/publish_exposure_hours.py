@@ -120,7 +120,7 @@ def main():
     parser.add_argument("--dbpassword", required=True)
     parser.add_argument(
         "--input-path",
-        default="hdfs://namenode:9000/data/weather/transform/events_clean",
+        default="hdfs://namenode:9000/data/weather/transform/batch/events_clean",
         help="Path to transformed parquet data"
     )
     args = parser.parse_args()

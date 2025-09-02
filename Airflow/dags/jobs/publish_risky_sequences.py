@@ -2,7 +2,7 @@
 from pyspark.sql import SparkSession, functions as F, Window as W
 import argparse
 
-INPUT_PATH = "hdfs://namenode:9000/data/weather/transform/events_clean"
+INPUT_PATH = "hdfs://namenode:9000/data/weather/transform/batch/events_clean"
 
 def quiet_logs(spark):
     jvm = spark.sparkContext._jvm
