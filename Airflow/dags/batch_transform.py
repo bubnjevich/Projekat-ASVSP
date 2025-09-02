@@ -20,8 +20,8 @@ def batch_transform():
     conn_id="SPARK_CONNECTION",
     application_args=[
         "--run-date", "{{ ds }}",
-        "--raw-path", "hdfs://namenode:9000/data/weather/raw/2025-08-25/WeatherEvents.csv",
-        "--out-base", "hdfs://namenode:9000/data/weather/transform",
+        "--raw-path", "hdfs://namenode:9000/data/weather/raw/2025-09-01/WeatherEvents.csv",
+        "--out-base", "hdfs://namenode:9000/data/weather/transform/batch",
     ])
 
     @task(task_id="hive_create_events_clean")
@@ -54,7 +54,7 @@ def batch_transform():
             )
             PARTITIONED BY (event_year int, event_month int)
             STORED AS PARQUET
-            LOCATION 'hdfs://namenode:9000/data/weather/transform/events_clean'
+            LOCATION 'hdfs://namenode:9000/data/weather/transform/batch/events_clean'
             """
         hook = HiveServer2Hook(hiveserver2_conn_id="HIVE_CONNECTION")
         hook.run(sql)

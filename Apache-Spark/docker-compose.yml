@@ -1,5 +1,6 @@
 services:
   spark-master:
+    build: ./docker/spark
     image: spark-custom:3.0.1-hadoop3.2.1
     container_name: spark-master
     environment:
@@ -14,6 +15,7 @@ services:
       - ./jars/postgresql-42.7.3.jar:/opt/spark/jars/postgresql-42.7.3.jar
 
   spark-worker-1:
+    build: ./docker/spark
     image: spark-custom:3.0.1-hadoop3.2.1
     container_name: spark-worker-1
     depends_on: [spark-master]
@@ -28,6 +30,7 @@ services:
       - ./jars/postgresql-42.7.3.jar:/opt/spark/jars/postgresql-42.7.3.jar
 
   spark-worker-2:
+    build: ./docker/spark
     image: spark-custom:3.0.1-hadoop3.2.1
     container_name: spark-worker-2
     depends_on: [spark-master]
