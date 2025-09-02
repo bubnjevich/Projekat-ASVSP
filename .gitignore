@@ -11,6 +11,8 @@ __pycache__/
 Airflow/logs/
 Airflow/files/
 Airflow/.env
+producer/run.sh
+producer/instrukcije.txt
 
 # Spark (ako pravi output/logove)
 Apache-Spark/logs/

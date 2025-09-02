@@ -96,6 +96,10 @@ do
             echo ">> Starting up Citus (single-node + pgAdmin)"
             docker compose -f Citus/docker-compose.yml up -d
             ;;
+        'producer')
+            echo ">> Starting up Weather Producer"
+            ./producer/run.sh   # poziva tvoju drugu skriptu
+            ;;
 
         *)
             echo ">> Service not recognized, skipping"
