@@ -43,10 +43,12 @@ while True:
     for _, row in df_iter.iterrows():
         try:
             weather = get_weather(row["location_lat"], row["location_lng"])
+            
 
             # izdvajanje meteo podataka
             current = weather.get("current", {})
             forecast = weather.get("forecast", {}).get("forecastday", [{}])[0]
+            
 
             data = {
                 "airport_code": row["airport_code"],

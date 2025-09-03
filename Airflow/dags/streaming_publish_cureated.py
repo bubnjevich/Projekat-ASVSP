@@ -19,20 +19,66 @@ CITUS_CONN_ID = "CITUS_DEFAULT"
 )
 def weather_streaming_dag():
 
-    citus_prepare_exposure = PostgresOperator(
-        task_id="citus_prepare_weather_realtime",
+    # citus_prepare_exposure = PostgresOperator(
+    #     task_id="citus_prepare_weather_realtime",
+    #     postgres_conn_id=CITUS_CONN_ID,
+    #     sql=weather_events_realtime_sql
+    # )
+    #
+    # weather_streaming_job = SparkSubmitOperator(
+    #     task_id="weather_streaming_job",
+    #     application="/opt/airflow/dags/jobs/streaming/weather_streaming.py",
+    #     name="weather_streaming_job",
+    #     conn_id=SPARK_CONN_ID,
+    #     application_args=[
+    #         "--jdbc-url", "jdbc:postgresql://citus:5432/weather_bi",
+    #         "--dbtable", "curated.weather_events_realtime",
+    #         "--dbuser", "admin",
+    #         "--dbpassword", "admin",
+    #         "--batch-path", "hdfs://namenode:9000/data/weather/transform/batch/events_clean",
+    #     ],
+    #     jars=POSTGRES_JDBC_JAR,
+    #     packages="org.apache.spark:spark-sql-kafka-0-10_2.12:3.0.1",
+    #     verbose=False
+    # )
+
+    # citus_prepare_weather_streaming2 = PostgresOperator(
+    #     task_id="citus_prepare_weather_realtime_2",
+    #     postgres_conn_id=CITUS_CONN_ID,
+    #     sql=weather_realtime_sliding_sql
+    # )
+    #
+    # weather_streaming_job2 = SparkSubmitOperator(
+    #     task_id="weather_streaming_job",
+    #     application="/opt/airflow/dags/jobs/streaming/weather_streaming_v2.py",
+    #     name="weather_streaming_job_2",
+    #     conn_id=SPARK_CONN_ID,
+    #     application_args=[
+    #         "--jdbc-url", "jdbc:postgresql://citus:5432/weather_bi",
+    #         "--dbtable", "curated.weather_realtime_sliding",
+    #         "--dbuser", "admin",
+    #         "--dbpassword", "admin",
+    #         "--batch-path", "hdfs://namenode:9000/data/weather/transform/batch/events_clean",
+    #     ],
+    #     jars=POSTGRES_JDBC_JAR,
+    #     packages="org.apache.spark:spark-sql-kafka-0-10_2.12:3.0.1",
+    #     verbose=False
+    # )
+
+    citus_prepare_weather_state_analytics = PostgresOperator(
+        task_id="weather_state_analytics",
         postgres_conn_id=CITUS_CONN_ID,
-        sql=weather_events_realtime_sql
+        sql=weather_state_analytics_sql
     )
 
-    weather_streaming_job = SparkSubmitOperator(
+    weather_state_analytics_job = SparkSubmitOperator(
         task_id="weather_streaming_job",
-        application="/opt/airflow/dags/jobs/streaming/weather_streaming.py",
-        name="weather_streaming_job",
+        application="/opt/airflow/dags/jobs/streaming/weather_state_analytics.py",
+        name="weather_state_analytics",
         conn_id=SPARK_CONN_ID,
         application_args=[
             "--jdbc-url", "jdbc:postgresql://citus:5432/weather_bi",
-            "--dbtable", "curated.weather_events_realtime",
+            "--dbtable", "curated.weather_state_analytics",
             "--dbuser", "admin",
             "--dbpassword", "admin",
             "--batch-path", "hdfs://namenode:9000/data/weather/transform/batch/events_clean",
@@ -42,6 +88,7 @@ def weather_streaming_dag():
         verbose=False
     )
 
-    weather_streaming_job
+    #citus_prepare_weather_streaming2 >> weather_streaming_job2
+    citus_prepare_weather_state_analytics >> weather_state_analytics_job
 
 dag = weather_streaming_dag()

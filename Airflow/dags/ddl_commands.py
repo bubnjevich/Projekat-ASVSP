@@ -282,8 +282,8 @@ CREATE TABLE IF NOT EXISTS curated.weather_events_realtime (
     avg_cloud DOUBLE PRECISION,
     avg_wind_kph DOUBLE PRECISION,
     avg_vis_km DOUBLE PRECISION,
-    avg_pressure_mb DOUBLE PRECISION
-    created_at TIMESTAMPTZ DEFAULT now(),
+    avg_pressure_mb DOUBLE PRECISION,
+    created_at timestamptz DEFAULT now(),
     PRIMARY KEY (airport_code, event_window_start)
 );
 
@@ -294,6 +294,71 @@ BEGIN
     WHERE logicalrelid = 'curated.weather_events_realtime'::regclass
   ) THEN
     PERFORM create_distributed_table('curated.weather_events_realtime','airport_code');
+  END IF;
+END $$;
+"""
+
+weather_realtime_sliding_sql = """
+CREATE SCHEMA IF NOT EXISTS curated;
+
+CREATE TABLE IF NOT EXISTS curated.weather_realtime_sliding (
+    airport_code        text NOT NULL,
+    state               text,
+    county              text,
+    event_window_start  timestamptz NOT NULL,
+    event_window_end    timestamptz NOT NULL,
+    event_count         int,
+    total_precip_in     double precision,
+    avg_temp_c          double precision,
+    avg_humidity        double precision,
+    max_wind_kph        double precision,
+    min_vis_km          double precision,
+    rainy_rate          double precision,
+    heat_stress_rate    double precision,
+    created_at          timestamptz DEFAULT now(),
+    PRIMARY KEY (airport_code, event_window_start)
+);
+
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_dist_partition
+    WHERE logicalrelid = 'curated.weather_realtime_sliding'::regclass
+  ) THEN
+    PERFORM create_distributed_table('curated.weather_realtime_sliding','airport_code');
+  END IF;
+END $$;
+
+"""
+
+weather_state_analytics_sql = """
+CREATE SCHEMA IF NOT EXISTS curated;
+
+CREATE TABLE IF NOT EXISTS curated.weather_state_analytics (
+    state TEXT NOT NULL,
+    interval_start TIMESTAMPTZ NOT NULL,
+    interval_end TIMESTAMPTZ NOT NULL,
+    event_count BIGINT,
+    avg_temp_c DOUBLE PRECISION,
+    min_temp_c DOUBLE PRECISION,
+    max_temp_c DOUBLE PRECISION,
+    stddev_temp_c DOUBLE PRECISION,
+    avg_humidity DOUBLE PRECISION,
+    stddev_humidity DOUBLE PRECISION,
+    heat_stress_days INT,
+    weather_volatility DOUBLE PRECISION,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    PRIMARY KEY (state, interval_start)
+);
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_dist_partition
+    WHERE logicalrelid = 'curated.weather_state_analytics'::regclass
+  ) THEN
+    PERFORM create_distributed_table('curated.weather_state_analytics','state');
   END IF;
 END $$;
 """

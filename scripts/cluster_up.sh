@@ -98,7 +98,7 @@ do
             ;;
         'producer')
             echo ">> Starting up Weather Producer"
-            ./producer/run.sh   # poziva tvoju drugu skriptu
+            ./producer/run.sh  
             ;;
 
         *)

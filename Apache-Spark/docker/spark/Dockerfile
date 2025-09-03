@@ -21,7 +21,8 @@ ENV PYSPARK_DRIVER_PYTHON=python3
 
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
     pip install --no-cache-dir "numpy<2.0" pyspark==3.0.1 && \
-    pip install --no-cache-dir h3 pandas==1.1.5 pyarrow==1.0.1
+    pip install --no-cache-dir h3 pandas==1.1.5 pyarrow==1.0.1 && \
+    pip install --no-cache-dir psycopg2-binary==2.9.9
 
 
 WORKDIR /opt/spark
