@@ -395,3 +395,37 @@ BEGIN
 END $$;
 
 """
+
+weather_realtime_instability_sql = """
+CREATE SCHEMA IF NOT EXISTS curated;
+
+CREATE TABLE IF NOT EXISTS curated.weather_realtime_instability (
+    airport_code        text NOT NULL,   -- Šifra aerodroma
+    state               text,            -- Država (iz batch-a)
+    county              text,            -- Okrug (iz batch-a)
+    event_window_start  timestamptz NOT NULL, -- Početak vremenskog prozora
+    event_window_end    timestamptz NOT NULL, -- Kraj vremenskog prozora
+    event_count         int,             -- Broj događaja u prozoru
+
+    -- KPI-jevi za nestabilnost vremena
+    min_dewpoint_spread double precision, -- (temp_c - dewpoint_c); manja vrednost = magla
+    stddev_pressure_mb  double precision, -- Standardna devijacija pritiska
+    max_gust_factor     double precision, -- gust_kph / wind_kph; udari vetra
+    stddev_cloud        double precision, -- Promenljivost oblačnosti (%)
+    instability_score   double precision, -- Kombinovani indeks nestabilnosti
+
+    created_at          timestamptz DEFAULT now(),
+    PRIMARY KEY (airport_code, event_window_start)
+);
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_dist_partition
+    WHERE logicalrelid = 'curated.weather_realtime_instability'::regclass
+  ) THEN
+    PERFORM create_distributed_table('curated.weather_realtime_instability','airport_code');
+  END IF;
+END $$;
+
+"""
