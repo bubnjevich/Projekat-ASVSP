@@ -47,6 +47,8 @@ Korišćen je javno dostupan skup podataka:
 4.	Za svaki aerodrom, prikazati najintenzivniji tročasovni period rizika svakog dana (koliko minuta u bilo kojem kliznom prozoru od 3 sata na dnevnom nivou). Ovo otkriva „udarne periode“ koji stvaraju najveći pritisak na operacije.
 5.	Za svaki aerodrom i za svaki tip vremenskog događaja  izračunati prosečno trajanje i broj događaja po mesecima, zajedno sa procentualnom promenom u odnosu na prethodni mesec, kako bi se pratio trend i olakšalo planiranje resursa.
 
+---
+
 ### Državni menadžer zimske službe
 1. **Workload indeks (DOT menadžer zimske službe)**  
    Izračunava se po okrugu i mesecu, sa trendovima, pokretnim prosekom i rangiranjem,  
@@ -66,7 +68,6 @@ Korišćen je javno dostupan skup podataka:
    - \(w_{sev}(s_i)\) – težinski koeficijent za ozbiljnost (*Light=1, Moderate=2, Heavy=3, Other=1*)  
    - \(w_{type}(t_i)\) – težinski koeficijent za tip (*Snow=3, Ice=2, Cold=1, ostalo=0*)  
 
----
 
 2. **Detekcija vremenskih sekvenci**  
    - Sekvenca tipa: **RAIN → COLD → SNOW**  
@@ -74,7 +75,7 @@ Korišćen je javno dostupan skup podataka:
    - Mera: trajanje sekvence u satima  
    - Korisno za prepoznavanje potencijalno opasnih obrazaca (npr. crni led)  
 
----
+
 
 3. **Identifikacija epizoda zimskih događaja (SNOW/ICE/COLD)**  
    - Epizoda = niz događaja između kojih nema prekida dužeg od **6h**  
@@ -91,7 +92,7 @@ Korišćen je javno dostupan skup podataka:
    - prosečno trajanje epizoda  
    - maksimalno trajanje epizoda  
 
----
+
 
 4. **Operativni rizik noćnih oluja (STORM)**  
    Kombinuju se učestalost, trajanje i ozbiljnost.  
@@ -102,7 +103,7 @@ Korišćen je javno dostupan skup podataka:
    - prosečna ozbiljnost noćnih oluja (*Light=1, Moderate=2, Heavy=3*)  
    - prosečno trajanje noćnih oluja (računato na osnovu poslednja 3 meseca, za svaki state+county)  
 
----
+
 
 5. **Analiza fenologije zimske sezone**  
    Za svaku kombinaciju *state + county + season_year* izračunava se:  
