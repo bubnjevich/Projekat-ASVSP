@@ -32,7 +32,6 @@ za obradu i vizualizaciju podataka.
 ---
 
 ## Dataset
-
 Korišćen je javno dostupan skup podataka:  
 [US Weather Events (Kaggle)](https://www.kaggle.com/datasets/sobhanmoosavi/us-weather-events)  
 ---
@@ -41,11 +40,11 @@ Korišćen je javno dostupan skup podataka:
 ### Operativni menadžer aerodroma
 
 1.	Koliko sati je aerodrom bio izložen operativno rizičnim vremenskim uslovima na dnevnom nivou, i zatim dodati rolling metrike (30 i 90 dana).
-•	 30 dana → pokazuje kratkoročni trend (mesec dana), korisno za operativne odluke (npr. raspored osoblja, nabavka soli za čišćenje snega).
-•	90 dana → daje sezonski trend, korisno za strateške odluke (planiranje resursa za čitavu zimu ili letnju sezonu).
+   -   30 dana → pokazuje kratkoročni trend (mesec dana), korisno za operativne odluke (npr. raspored osoblja, nabavka soli za čišćenje snega).
+   -	90 dana → daje sezonski trend, korisno za strateške odluke (planiranje resursa za čitavu zimu ili letnju sezonu).
 2.	Za svaki aerodrom, i za svaki tip nepovoljnog uslova (Fog, Snow, Thunderstorm), koji su označeni kao (Moderate ili Heavy), prikazati najduži kontinuirani niz nepovoljnih uslova (uz sessionization gde se spajaju događaji sa pauzom  ≤ 60 minuta).
 3.	Za svaki aerodrom prikazati koliko sati se, na tom aerodromu, u preklapajućem intervalu, javljaju kombinacije vremenskih uslova (npr. Fog + Rain), na dnevnom nivou ?
-4.	Za svaki aerodrome, prikazati najintenzivniji tročasovni period rizika svakog dana (koliko minuta u bilo kojem kliznom prozoru od 3 sata na dnevnom nivou). Ovo otkriva „udarne periode“ koji stvaraju najveći pritisak na operacije.
+4.	Za svaki aerodrom, prikazati najintenzivniji tročasovni period rizika svakog dana (koliko minuta u bilo kojem kliznom prozoru od 3 sata na dnevnom nivou). Ovo otkriva „udarne periode“ koji stvaraju najveći pritisak na operacije.
 5.	Za svaki aerodrom i za svaki tip vremenskog događaja  izračunati prosečno trajanje i broj događaja po mesecima, zajedno sa procentualnom promenom u odnosu na prethodni mesec, kako bi se pratio trend i olakšalo planiranje resursa.
 
 ### Državni menadžer zimske službe
