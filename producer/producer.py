@@ -63,7 +63,12 @@ while True:
                 "cloud": current.get("cloud"),  # oblacnost u procentima
                 "wind_kph": current.get("wind_kph"),   # jacina vetra
                 "pressure_mb" : current.get("pressure_mb"), # pritisak u milibarima
-                "vis_km": current.get("vis_km") # vidljivost u km
+                "vis_km": current.get("vis_km"), # vidljivost u km
+                "dewpoint_c" : current.get("dewpoint_c"), # tacka rose, tj. temperatura na kojoj vazduh mora da se ohladi da bi dobio zasicenje
+                "uv" : current.get("uv"), # uv indeks zracenja
+                "gust_kph" : current.get("gust_kph"), # udar vetra u km/h
+                "is_day" : current.get("is_day"),
+                "gti" : current.get("gti") # kolocina Suncevog zracenja (direkno + difuzno + refkletno)
             }
 
             producer.send(TOPIC, value=data)

@@ -65,20 +65,43 @@ def weather_streaming_dag():
     #     verbose=False
     # )
 
-    citus_prepare_weather_state_analytics = PostgresOperator(
-        task_id="weather_state_analytics",
+    # citus_prepare_weather_state_analytics = PostgresOperator(
+    #     task_id="weather_state_analytics",
+    #     postgres_conn_id=CITUS_CONN_ID,
+    #     sql=weather_state_analytics_sql
+    # )
+    #
+    # weather_state_analytics_job = SparkSubmitOperator(
+    #     task_id="weather_streaming_job",
+    #     application="/opt/airflow/dags/jobs/streaming/weather_state_analytics.py",
+    #     name="weather_state_analytics",
+    #     conn_id=SPARK_CONN_ID,
+    #     application_args=[
+    #         "--jdbc-url", "jdbc:postgresql://citus:5432/weather_bi",
+    #         "--dbtable", "curated.weather_state_analytics",
+    #         "--dbuser", "admin",
+    #         "--dbpassword", "admin",
+    #         "--batch-path", "hdfs://namenode:9000/data/weather/transform/batch/events_clean",
+    #     ],
+    #     jars=POSTGRES_JDBC_JAR,
+    #     packages="org.apache.spark:spark-sql-kafka-0-10_2.12:3.0.1",
+    #     verbose=False
+    # )
+
+    citus_prepare_weather_realtime_radiation = PostgresOperator(
+        task_id="weather_realtime_radiation",
         postgres_conn_id=CITUS_CONN_ID,
-        sql=weather_state_analytics_sql
+        sql=weather_realtime_extended_sql
     )
 
-    weather_state_analytics_job = SparkSubmitOperator(
-        task_id="weather_streaming_job",
-        application="/opt/airflow/dags/jobs/streaming/weather_state_analytics.py",
-        name="weather_state_analytics",
+    weather_realtime_radiation_job = SparkSubmitOperator(
+        task_id="weather_realtime_radiation_job",
+        application="/opt/airflow/dags/jobs/streaming/weather_streaming_radiation.py",
+        name="weather_realtime_radiation",
         conn_id=SPARK_CONN_ID,
         application_args=[
             "--jdbc-url", "jdbc:postgresql://citus:5432/weather_bi",
-            "--dbtable", "curated.weather_state_analytics",
+            "--dbtable", "curated.weather_realtime_radiation",
             "--dbuser", "admin",
             "--dbpassword", "admin",
             "--batch-path", "hdfs://namenode:9000/data/weather/transform/batch/events_clean",
@@ -89,6 +112,7 @@ def weather_streaming_dag():
     )
 
     #citus_prepare_weather_streaming2 >> weather_streaming_job2
-    citus_prepare_weather_state_analytics >> weather_state_analytics_job
+    #citus_prepare_weather_state_analytics >> weather_state_analytics_job
+    citus_prepare_weather_realtime_radiation >> weather_realtime_radiation_job
 
 dag = weather_streaming_dag()
