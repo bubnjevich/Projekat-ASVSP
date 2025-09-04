@@ -198,7 +198,7 @@ CREATE TABLE IF NOT EXISTS curated.winter_burstiness (
 );
 
 DO $$
-BEGIN
+BEGIN  
   IF NOT EXISTS (
     SELECT 1 FROM pg_dist_partition
     WHERE logicalrelid = 'curated.winter_burstiness'::regclass

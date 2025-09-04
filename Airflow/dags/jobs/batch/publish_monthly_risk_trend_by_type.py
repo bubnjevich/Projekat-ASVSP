@@ -31,7 +31,7 @@ def main():
     spark = build_spark()
     quiet_logs(spark)
 
-    # 1) Učitaj i pripremi trajanje (min); koristi lokalne timestamp-e iz ulaza
+
     df = (
         spark.read.parquet(INPUT_PATH)
             .select("airport_code", "type", "local_start_ts", "local_end_ts")
