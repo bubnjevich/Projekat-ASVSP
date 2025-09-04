@@ -52,11 +52,12 @@ Korišćen je javno dostupan skup podataka:
    Izračunava se po okrugu i mesecu, sa trendovima, pokretnim prosekom i rangiranjem,  
    kako bi se planirala potrošnja soli, organizacija smena i premeštanje ekipa.  
 
-   Formula:  
 
-   $$
-   W(y, m, c) = \sum_{i \in E(y, m, c)} \left( \frac{d_i}{60} \times w_{sev}(s_i) \times w_{type}(t_i) \right)
-   $$
+Formula:  
+
+<p align="center">
+$W(y, m, c) = \sum_{i \in E(y, m, c)} \left( \frac{d_i}{60} \times w_{sev}(s_i) \times w_{type}(t_i) \right)$
+</p>
 
    **Gde je:**
    - $E(y,m,c)$ – skup svih vremenskih događaja u okrugu $c$ tokom meseca $m$ godine $y$  
