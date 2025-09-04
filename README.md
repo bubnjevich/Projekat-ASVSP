@@ -59,12 +59,12 @@ Korišćen je javno dostupan skup podataka:
    $$
 
    **Gde je:**
-   - \(E(y,m,c)\) – skup svih vremenskih događaja u okrugu \(c\) tokom meseca \(m\) godine \(y\)  
-   - \(d_i\) – trajanje događaja *i* u minutima  
-   - \(s_i\) – ozbiljnost (*severity*) događaja *i*  
-   - \(t_i\) – tip događaja (Snow, Ice, Cold, …)  
-   - \(w_{sev}(s_i)\) – težinski koeficijent za ozbiljnost (*Light=1, Moderate=2, Heavy=3, Other=1*)  
-   - \(w_{type}(t_i)\) – težinski koeficijent za tip (*Snow=3, Ice=2, Cold=1, ostalo=0*)  
+   - $E(y,m,c)$ – skup svih vremenskih događaja u okrugu $c$ tokom meseca $m$ godine $y$  
+   - $d_i$ – trajanje događaja $i$ u minutima  
+   - $s_i$ – ozbiljnost (*severity*) događaja $i$  
+   - $t_i$ – tip događaja (Snow, Ice, Cold, …)  
+   - $w_{sev}(s_i)$ – težinski koeficijent za ozbiljnost (*Light=1, Moderate=2, Heavy=3, Other=1*)  
+   - $w_{type}(t_i)$ – težinski koeficijent za tip (*Snow=3, Ice=2, Cold=1, ostalo=0*)  
 
 ---
 
